@@ -75,34 +75,20 @@
     <label>Âge du chat :</label>
     <input type="number" id="ageChat" min="0" max="30" required />
 
-<label>Tâches :</label>
-<div style="font-size: 0.9em; opacity: 0.8;">(Écris une tâche par ligne)</div>
-<textarea id="taches" rows="5" required oninput="calculerPrix()"
-placeholder="Exemple :
-vaccination
-griffes
-toilettage"></textarea>
-
     <label>Tâches :</label>
-<div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">
-  (Écris une tâche par ligne)
-</div>
-
-<textarea id="taches" rows="5" required oninput="calculerPrix()"
-placeholder="Exemple :
+    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">
+      (Écris une tâche par ligne)
+    </div>
+    <textarea id="taches" rows="5" required oninput="calculerPrix()" placeholder="Exemple :
 vaccination
 griffes
-toilettage"
-style="margin-bottom: 20px;"></textarea>
+toilettage" style="margin-bottom: 20px;"></textarea>
 
-<label>Description :</label>
-<div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">
-  (Nombre de jours que je dois garder le chat, infos importantes, etc.)
-</div>
-
-<textarea id="description" rows="3" placeholder="Ex: 3 jours, chat très calme, mange à 8h et 18h"></textarea>
-
-
+    <label>Description :</label>
+    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">
+      (Nombre de jours que je dois garder le chat, infos importantes, etc.)
+    </div>
+    <textarea id="description" rows="3" placeholder="Ex: 3 jours, chat très calme, mange à 8h et 18h"></textarea>
 
     <div id="prix">Prix estimé : 0 €</div>
 
@@ -130,6 +116,7 @@ style="margin-bottom: 20px;"></textarea>
       if (!adresse) {
         result.textContent = "Entre une adresse.";
         result.className = "invalid";
+        adresseValidee = false;
         return;
       }
 
@@ -149,19 +136,51 @@ style="margin-bottom: 20px;"></textarea>
           result.className = "invalid";
         }
       } catch (e) {
+        adresseValidee = false;
         result.textContent = "Erreur de connexion";
         result.className = "invalid";
       }
     }
 
-    function validerFormulaire() {
+    async function validerFormulaire() {
       if (!adresseValidee) {
         alert("Vérifie l'adresse avant d'envoyer");
         return false;
       }
 
-      alert("Rendez-vous enregistré !");
-      return false;
+      // Récupération des données
+      const data = {
+        dateRdv: document.getElementById("dateRdv").value,
+        nom: document.getElementById("nom").value,
+        telephone: document.getElementById("telephone").value,
+        adresse: document.getElementById("adresse").value,
+        ageChat: document.getElementById("ageChat").value,
+        taches: document.getElementById("taches").value,
+        description: document.getElementById("description").value
+      };
+
+      try {
+        // CHANGE cette URL par celle de ton backend Replit
+        const backendUrl = "https://TON-REPLIT-URL/rdv";
+
+        const response = await fetch(backendUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          alert("Erreur lors de l'envoi, réessaye plus tard.");
+          return false;
+        }
+
+        alert("Rendez-vous envoyé avec succès !");
+      } catch (err) {
+        alert("Erreur réseau lors de l'envoi.");
+        console.error(err);
+      }
+
+      return false; // empêcher rechargement page
     }
 
     calculerPrix();
