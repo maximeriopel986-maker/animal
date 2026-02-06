@@ -75,8 +75,14 @@
     <label>Âge du chat :</label>
     <input type="number" id="ageChat" min="0" max="30" required />
 
-    <label>Tâches :</label>
-    <textarea id="taches" rows="5" required oninput="calculerPrix()"></textarea>
+<label>Tâches :</label>
+<div style="font-size: 0.9em; opacity: 0.8;">(Écris une tâche par ligne)</div>
+<textarea id="taches" rows="5" required oninput="calculerPrix()"
+placeholder="Exemple :
+vaccination
+griffes
+toilettage"></textarea>
+
 
     <div id="prix">Prix estimé : 0 €</div>
 
