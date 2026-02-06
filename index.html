@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Calendrier tactile avec Flatpickr</title>
-  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+  <title>Calendrier tactile natif</title>
   <style>
     body {
       background-color: #001244;
@@ -17,36 +16,27 @@
       display: block;
       margin-top: 15px;
     }
-    input {
+    input[type="date"] {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
       border-radius: 4px;
       border: none;
       font-size: 1em;
+      background-color: white;
+      color: black;
     }
   </style>
 </head>
 <body>
-  <h1>Prendre rendez-vous</h1>
+  <h1>Choisis une date</h1>
 
-  <form>
-    <label for="dateRdv">Date du rendez-vous :</label>
-    <input type="text" id="dateRdv" placeholder="Cliquez pour choisir une date" />
-    
-    <button type="submit" style="margin-top:20px; padding:10px; font-size:1.1em;">Envoyer</button>
-  </form>
+  <label for="dateRdv">Date du rendez-vous :</label>
+  <input type="date" id="dateRdv" name="dateRdv" min="" required />
 
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
-    flatpickr("#dateRdv", {
-      dateFormat: "d-m-Y",
-      minDate: "today",
-      disableMobile: false, // Permet d’utiliser le calendrier natif sur mobile si possible
-      locale: {
-        firstDayOfWeek: 1
-      }
-    });
+    // Date min = aujourd'hui pour empêcher de choisir une date passée
+    document.getElementById('dateRdv').min = new Date().toISOString().split('T')[0];
   </script>
 </body>
 </html>
