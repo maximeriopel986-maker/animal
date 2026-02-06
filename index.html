@@ -107,27 +107,23 @@
         return;
       }
 
-      const apiKey = "AIzaSyBmp5Qhv2gklLQ1JaIhhIjYsKROiAeNhVM";
-
-      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(adresse)}&key=${apiKey}`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse)}`;
 
       try {
         const res = await fetch(url);
         const data = await res.json();
 
-        console.log("Réponse Google:", data);
-
-        if (data.status === "OK") {
+        if (data.length > 0) {
           adresseValidee = true;
-          result.textContent = "Adresse valide : " + data.results[0].formatted_address;
+          result.textContent = "Adresse valide : " + data[0].display_name;
           result.className = "valid";
         } else {
           adresseValidee = false;
-          result.textContent = "Erreur Google: " + data.status;
+          result.textContent = "Adresse invalide, veuillez corriger";
           result.className = "invalid";
         }
       } catch (e) {
-        result.textContent = "Erreur connexion Google";
+        result.textContent = "Erreur de connexion";
         result.className = "invalid";
       }
     }
