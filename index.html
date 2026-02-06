@@ -45,156 +45,101 @@
       font-weight: bold;
       font-size: 1.2em;
     }
-    #message-paiement {
-      margin-top: 20px;
-      font-style: italic;
-      color: #ffcc00;
-    }
     #verification-result {
       margin-top: 10px;
       font-weight: bold;
     }
-    #verification-result.valid {
-      color: #4CAF50;
-    }
-    #verification-result.invalid {
-      color: #FF5252;
-    }
+    .valid { color: #4CAF50; }
+    .invalid { color: #FF5252; }
   </style>
 </head>
 <body>
   <h1>Prendre rendez-vous pour votre chat</h1>
 
-  <form id="rdvForm" onsubmit="return validerFormulaire()">
-    <label for="dateRdv">Date du rendez-vous :</label>
-    <input type="date" id="dateRdv" name="dateRdv" min="" required />
+  <form onsubmit="return validerFormulaire()">
+    <label>Date du rendez-vous :</label>
+    <input type="date" id="dateRdv" required />
 
-    <label for="nom">Nom complet :</label>
-    <input type="text" id="nom" name="nom" required />
+    <label>Nom complet :</label>
+    <input type="text" id="nom" required />
 
-    <label for="telephone">Numéro de téléphone :</label>
-    <input type="tel" id="telephone" name="telephone" pattern="[0-9]{10,15}" placeholder="Ex: 0612345678" required />
+    <label>Téléphone :</label>
+    <input type="tel" id="telephone" required />
 
-    <label for="adresse">Adresse :</label>
-    <textarea id="adresse" name="adresse" rows="2" required></textarea>
+    <label>Adresse :</label>
+    <textarea id="adresse" required></textarea>
 
     <button type="button" onclick="verifierAdresse()">Vérifier l'adresse</button>
     <div id="verification-result"></div>
 
-    <label for="ageChat">Âge de votre chat (en années) :</label>
-    <input type="number" id="ageChat" name="ageChat" min="0" max="30" required />
+    <label>Âge du chat :</label>
+    <input type="number" id="ageChat" min="0" max="30" required />
 
-    <label for="taches">Tâches à faire (une tâche par ligne) :</label>
-    <textarea id="taches" name="taches" rows="5" placeholder="Ex: Coupe des griffes&#10;Vaccination&#10;Contrôle santé" required oninput="calculerPrix()"></textarea>
+    <label>Tâches :</label>
+    <textarea id="taches" rows="5" required oninput="calculerPrix()"></textarea>
 
     <div id="prix">Prix estimé : 0 €</div>
-
-    <div id="message-paiement">Le paiement se fait uniquement en espèces au rendez-vous.</div>
 
     <button type="submit">Envoyer la demande</button>
   </form>
 
   <script>
-    // Date min = aujourd'hui
     document.getElementById('dateRdv').min = new Date().toISOString().split('T')[0];
 
     const prixParTache = 20;
-    let adresseValidee = false;  // pour vérifier si adresse validée
+    let adresseValidee = false;
 
     function calculerPrix() {
-      const tachesText = document.getElementById('taches').value.trim();
-      if (!tachesText) {
-        document.getElementById('prix').textContent = 'Prix estimé : 0 €';
-        return;
-      }
-      const taches = tachesText.split('\n').filter(line => line.trim() !== '');
-      const totalPrix = taches.length * prixParTache;
-      document.getElementById('prix').textContent = `Prix estimé : ${totalPrix} € (${taches.length} tâche${taches.length > 1 ? 's' : ''} × ${prixParTache} €)`;
+      const taches = document.getElementById('taches').value
+        .split('\n')
+        .filter(t => t.trim() !== '');
+      document.getElementById('prix').textContent =
+        `Prix estimé : ${taches.length * prixParTache} €`;
     }
 
     async function verifierAdresse() {
       const adresse = document.getElementById('adresse').value.trim();
-      const resultDiv = document.getElementById('verification-result');
-      adresseValidee = false;
+      const result = document.getElementById('verification-result');
 
       if (!adresse) {
-        resultDiv.textContent = "Veuillez entrer une adresse.";
-        resultDiv.className = "invalid";
+        result.textContent = "Entre une adresse.";
+        result.className = "invalid";
         return;
       }
 
-      try {
-        const apiKey = "AIzaSyBmp5Qhv2gklLQ1JaIhhIjYsKROiAeNhVM"; // ta clé API Google Maps
-        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(adresse)}&key=${apiKey}`;
+      const apiKey = "AIzaSyBmp5Qhv2gklLQ1JaIhhIjYsKROiAeNhVM";
 
-        const response = await fetch(url);
-        const data = await response.json();
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(adresse)}&key=${apiKey}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        console.log("Réponse Google:", data);
 
         if (data.status === "OK") {
-          const formattedAddress = data.results[0].formatted_address;
-          resultDiv.textContent = `Adresse valide : ${formattedAddress}`;
-          resultDiv.className = "valid";
           adresseValidee = true;
+          result.textContent = "Adresse valide : " + data.results[0].formatted_address;
+          result.className = "valid";
         } else {
-          resultDiv.textContent = "Adresse invalide, veuillez corriger.";
-          resultDiv.className = "invalid";
+          adresseValidee = false;
+          result.textContent = "Erreur Google: " + data.status;
+          result.className = "invalid";
         }
-      } catch (err) {
-        resultDiv.textContent = "Erreur lors de la vérification.";
-        resultDiv.className = "invalid";
-        console.error(err);
+      } catch (e) {
+        result.textContent = "Erreur connexion Google";
+        result.className = "invalid";
       }
     }
 
-    async function validerFormulaire() {
-      const nom = document.getElementById('nom').value.trim();
-      const tel = document.getElementById('telephone').value.trim();
-      const adresse = document.getElementById('adresse').value.trim();
-      const ageChat = document.getElementById('ageChat').value;
-      const tachesText = document.getElementById('taches').value.trim();
-      const dateRdv = document.getElementById('dateRdv').value;
-
-      if (!nom || !tel || !adresse || !ageChat || !tachesText || !dateRdv) {
-        alert("Merci de remplir tous les champs.");
-        return false;
-      }
-
+    function validerFormulaire() {
       if (!adresseValidee) {
-        alert("Merci de vérifier et valider votre adresse avant de soumettre.");
+        alert("Vérifie l'adresse avant d'envoyer");
         return false;
       }
 
-      try {
-        const urlBackend = "https://3e67d7b4-fb13-4b00-9d31-8ae4c9c97073-00-2kvb7jsnnuhrg.picard.replit.dev/verifier";
-
-        const response = await fetch(urlBackend, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ adresse: adresse, taches: tachesText }),
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          alert(err.erreur || "Adresse invalide. Veuillez corriger.");
-          return false;
-        }
-
-        const data = await response.json();
-
-        alert(
-          `Merci ${nom} !\nVotre demande de rendez-vous pour le ${dateRdv} a été prise en compte.\n` +
-          `Adresse : ${data.adresse}\n` +
-          `Tâches analysées : ${data.taches}\n` +
-          `Nous vous contacterons au ${tel}.\n\n` +
-          `Rappel : paiement uniquement en espèces au rendez-vous.`
-        );
-
-      } catch (error) {
-        alert("Erreur lors de la vérification, réessayez plus tard.");
-        console.error(error);
-      }
-
-      return false; // empêche le rechargement de la page
+      alert("Rendez-vous enregistré !");
+      return false;
     }
 
     calculerPrix();
