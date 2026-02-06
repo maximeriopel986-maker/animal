@@ -50,6 +50,16 @@
       font-style: italic;
       color: #ffcc00;
     }
+    #verification-result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #verification-result.valid {
+      color: #4CAF50;
+    }
+    #verification-result.invalid {
+      color: #FF5252;
+    }
   </style>
 </head>
 <body>
@@ -67,6 +77,9 @@
 
     <label for="adresse">Adresse :</label>
     <textarea id="adresse" name="adresse" rows="2" required></textarea>
+
+    <button type="button" onclick="verifierAdresse()">Vérifier l'adresse</button>
+    <div id="verification-result"></div>
 
     <label for="ageChat">Âge de votre chat (en années) :</label>
     <input type="number" id="ageChat" name="ageChat" min="0" max="30" required />
@@ -86,6 +99,7 @@
     document.getElementById('dateRdv').min = new Date().toISOString().split('T')[0];
 
     const prixParTache = 20;
+    let adresseValidee = false;  // pour vérifier si adresse validée
 
     function calculerPrix() {
       const tachesText = document.getElementById('taches').value.trim();
@@ -96,6 +110,40 @@
       const taches = tachesText.split('\n').filter(line => line.trim() !== '');
       const totalPrix = taches.length * prixParTache;
       document.getElementById('prix').textContent = `Prix estimé : ${totalPrix} € (${taches.length} tâche${taches.length > 1 ? 's' : ''} × ${prixParTache} €)`;
+    }
+
+    async function verifierAdresse() {
+      const adresse = document.getElementById('adresse').value.trim();
+      const resultDiv = document.getElementById('verification-result');
+      adresseValidee = false;
+
+      if (!adresse) {
+        resultDiv.textContent = "Veuillez entrer une adresse.";
+        resultDiv.className = "invalid";
+        return;
+      }
+
+      try {
+        const apiKey = "AIzaSyBmp5Qhv2gklLQ1JaIhhIjYsKROiAeNhVM"; // ta clé API Google Maps
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(adresse)}&key=${apiKey}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status === "OK") {
+          const formattedAddress = data.results[0].formatted_address;
+          resultDiv.textContent = `Adresse valide : ${formattedAddress}`;
+          resultDiv.className = "valid";
+          adresseValidee = true;
+        } else {
+          resultDiv.textContent = "Adresse invalide, veuillez corriger.";
+          resultDiv.className = "invalid";
+        }
+      } catch (err) {
+        resultDiv.textContent = "Erreur lors de la vérification.";
+        resultDiv.className = "invalid";
+        console.error(err);
+      }
     }
 
     async function validerFormulaire() {
@@ -111,8 +159,12 @@
         return false;
       }
 
+      if (!adresseValidee) {
+        alert("Merci de vérifier et valider votre adresse avant de soumettre.");
+        return false;
+      }
+
       try {
-        // Ton URL backend Replit, vérifie qu’elle est correcte (finit bien par /verifier)
         const urlBackend = "https://3e67d7b4-fb13-4b00-9d31-8ae4c9c97073-00-2kvb7jsnnuhrg.picard.replit.dev/verifier";
 
         const response = await fetch(urlBackend, {
