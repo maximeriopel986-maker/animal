@@ -120,16 +120,29 @@ toilettage" style="margin-bottom: 20px;"></textarea>
         return;
       }
 
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresse)}`;
+      // Limite la recherche au Canada pour éviter faux positifs
+      const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=ca&q=${encodeURIComponent(adresse)}`;
 
       try {
         const res = await fetch(url);
         const data = await res.json();
 
         if (data.length > 0) {
-          adresseValidee = true;
-          result.textContent = "Adresse valide : " + data[0].display_name;
-          result.className = "valid";
+          // Types d’adresses acceptées (tu peux adapter)
+          const validTypes = ['house', 'building', 'residential', 'road', 'street', 'postcode'];
+
+          // Trouve une réponse suffisamment précise
+          const validResult = data.find(place => validTypes.includes(place.type));
+
+          if (validResult) {
+            adresseValidee = true;
+            result.textContent = "Adresse valide : " + validResult.display_name;
+            result.className = "valid";
+          } else {
+            adresseValidee = false;
+            result.textContent = "Adresse trop vague, essaie d’être plus précis.";
+            result.className = "invalid";
+          }
         } else {
           adresseValidee = false;
           result.textContent = "Adresse invalide, veuillez corriger";
@@ -160,9 +173,7 @@ toilettage" style="margin-bottom: 20px;"></textarea>
       };
 
       try {
-        // CHANGE cette URL par celle de ton backend Replit
-    const backendUrl = "https://26fea5ba-47d3-458c-84db-72f48e966804-00-327ic8zhvwnli.kirk.replit.dev/rdv";
-
+        const backendUrl = "https://26fea5ba-47d3-458c-84db-72f48e966804-00-327ic8zhvwnli.kirk.replit.dev/rdv";
 
         const response = await fetch(backendUrl, {
           method: "POST",
