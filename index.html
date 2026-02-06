@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Test calendrier Flatpickr</title>
-  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+  <title>Date rendez-vous responsive</title>
   <style>
     body {
       background-color: #001244;
@@ -17,7 +16,7 @@
       display: block;
       margin-top: 15px;
     }
-    input {
+    input[type="date"] {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
@@ -28,23 +27,18 @@
   </style>
 </head>
 <body>
-  <h1>Choisis une date</h1>
+  <h1>Prendre rendez-vous</h1>
 
-  <label for="dateRdv">Date du rendez-vous :</label>
-  <input type="text" id="dateRdv" placeholder="Clique pour choisir une date" />
+  <form>
+    <label for="dateRdv">Date du rendez-vous :</label>
+    <input type="date" id="dateRdv" name="dateRdv" min="" required />
 
-  <!-- Chargement de la librairie Flatpickr -->
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <button type="submit" style="margin-top:20px; padding:10px; font-size:1.1em;">Envoyer</button>
+  </form>
 
   <script>
-    // Initialisation Flatpickr sur le champ #dateRdv
-    flatpickr("#dateRdv", {
-      dateFormat: "d-m-Y",
-      minDate: "today",
-      locale: {
-        firstDayOfWeek: 1 // semaine commence lundi
-      }
-    });
+    // Définit la date minimale à aujourd'hui
+    document.getElementById('dateRdv').min = new Date().toISOString().split('T')[0];
   </script>
 </body>
 </html>
