@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Calendrier avec Flatpickr</title>
+  <title>Test calendrier Flatpickr</title>
   <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
   <style>
     body {
@@ -33,8 +33,11 @@
   <label for="dateRdv">Date du rendez-vous :</label>
   <input type="text" id="dateRdv" placeholder="Clique pour choisir une date" />
 
+  <!-- Chargement de la librairie Flatpickr -->
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
   <script>
+    // Initialisation Flatpickr sur le champ #dateRdv
     flatpickr("#dateRdv", {
       dateFormat: "d-m-Y",
       minDate: "today",
