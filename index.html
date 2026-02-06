@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Calendrier tactile natif</title>
+  <title>Prendre rendez-vous</title>
   <style>
     body {
       background-color: #001244;
@@ -16,27 +16,106 @@
       display: block;
       margin-top: 15px;
     }
-    input[type="date"] {
+    input, textarea {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
       border-radius: 4px;
       border: none;
       font-size: 1em;
-      background-color: white;
-      color: black;
+    }
+    textarea {
+      resize: vertical;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #0055cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #003d99;
+    }
+    #prix {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    #message-paiement {
+      margin-top: 20px;
+      font-style: italic;
+      color: #ffcc00;
     }
   </style>
 </head>
 <body>
-  <h1>Choisis une date</h1>
+  <h1>Prendre rendez-vous pour votre chat</h1>
 
-  <label for="dateRdv">Date du rendez-vous :</label>
-  <input type="date" id="dateRdv" name="dateRdv" min="" required />
+  <form id="rdvForm" onsubmit="return validerFormulaire()">
+    <label for="dateRdv">Date du rendez-vous :</label>
+    <input type="date" id="dateRdv" name="dateRdv" min="" required />
+
+    <label for="nom">Nom complet :</label>
+    <input type="text" id="nom" name="nom" required />
+
+    <label for="telephone">Numéro de téléphone :</label>
+    <input type="tel" id="telephone" name="telephone" pattern="[0-9]{10,15}" placeholder="Ex: 0612345678" required />
+
+    <label for="adresse">Adresse :</label>
+    <textarea id="adresse" name="adresse" rows="2" required></textarea>
+
+    <label for="ageChat">Âge de votre chat (en années) :</label>
+    <input type="number" id="ageChat" name="ageChat" min="0" max="30" required />
+
+    <label for="taches">Tâches à faire (une tâche par ligne) :</label>
+    <textarea id="taches" name="taches" rows="5" placeholder="Ex: Coupe des griffes&#10;Vaccination&#10;Contrôle santé" required oninput="calculerPrix()"></textarea>
+
+    <div id="prix">Prix estimé : 0 €</div>
+
+    <div id="message-paiement">Le paiement se fait uniquement en espèces au rendez-vous.</div>
+
+    <button type="submit">Envoyer la demande</button>
+  </form>
 
   <script>
-    // Date min = aujourd'hui pour empêcher de choisir une date passée
+    // Date min = aujourd'hui
     document.getElementById('dateRdv').min = new Date().toISOString().split('T')[0];
+
+    const prixParTache = 20;
+
+    function calculerPrix() {
+      const tachesText = document.getElementById('taches').value.trim();
+      if (!tachesText) {
+        document.getElementById('prix').textContent = 'Prix estimé : 0 €';
+        return;
+      }
+      const taches = tachesText.split('\n').filter(line => line.trim() !== '');
+      const totalPrix = taches.length * prixParTache;
+      document.getElementById('prix').textContent = `Prix estimé : ${totalPrix} € (${taches.length} tâche${taches.length > 1 ? 's' : ''} × ${prixParTache} €)`;
+    }
+
+    function validerFormulaire() {
+      const nom = document.getElementById('nom').value.trim();
+      const tel = document.getElementById('telephone').value.trim();
+      const adresse = document.getElementById('adresse').value.trim();
+      const ageChat = document.getElementById('ageChat').value;
+      const tachesText = document.getElementById('taches').value.trim();
+      const dateRdv = document.getElementById('dateRdv').value;
+
+      if (!nom || !tel || !adresse || !ageChat || !tachesText || !dateRdv) {
+        alert("Merci de remplir tous les champs.");
+        return false;
+      }
+
+      alert(`Merci ${nom} !\nVotre demande de rendez-vous pour le ${dateRdv} a été prise en compte.\nNous vous contacterons au ${tel}.\n\nRappel : paiement uniquement en espèces au rendez-vous.`);
+      return false; // empêche le rechargement
+    }
+
+    calculerPrix();
   </script>
 </body>
 </html>
