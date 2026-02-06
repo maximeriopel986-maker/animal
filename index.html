@@ -98,7 +98,7 @@
       document.getElementById('prix').textContent = `Prix estimé : ${totalPrix} € (${taches.length} tâche${taches.length > 1 ? 's' : ''} × ${prixParTache} €)`;
     }
 
-    function validerFormulaire() {
+    async function validerFormulaire() {
       const nom = document.getElementById('nom').value.trim();
       const tel = document.getElementById('telephone').value.trim();
       const adresse = document.getElementById('adresse').value.trim();
@@ -111,8 +111,38 @@
         return false;
       }
 
-      alert(`Merci ${nom} !\nVotre demande de rendez-vous pour le ${dateRdv} a été prise en compte.\nNous vous contacterons au ${tel}.\n\nRappel : paiement uniquement en espèces au rendez-vous.`);
-      return false; // empêche le rechargement
+      try {
+        // Mets ici l’URL publique de ton backend Replit
+        const urlBackend = "https://ton-backend-replit.repl.co/verifier";
+
+        const response = await fetch(urlBackend, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ adresse: adresse, taches: tachesText }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          alert(err.erreur || "Adresse invalide. Veuillez corriger.");
+          return false;
+        }
+
+        const data = await response.json();
+
+        alert(
+          `Merci ${nom} !\nVotre demande de rendez-vous pour le ${dateRdv} a été prise en compte.\n` +
+          `Adresse : ${data.adresse}\n` +
+          `Tâches analysées : ${data.taches}\n` +
+          `Nous vous contacterons au ${tel}.\n\n` +
+          `Rappel : paiement uniquement en espèces au rendez-vous.`
+        );
+
+      } catch (error) {
+        alert("Erreur lors de la vérification, réessayez plus tard.");
+        console.error(error);
+      }
+
+      return false; // empêche le rechargement de la page
     }
 
     calculerPrix();
